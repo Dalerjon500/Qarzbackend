@@ -1,18 +1,20 @@
+import numbers
+
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from database import get_connection
 
 
-class User(BaseModel):
-    email: str = Field(..., max_length=256)
-    phone_number: str
-    full_name : str
+class Car(BaseModel):
+    model: str = Field(..., max_length=256)
+    color: str
+    year: str
 
 
-class UsersService:
+class CarsService:
 
-    def get_users(self):
+    def get_cars(self):
         connect = get_connection()
         cursor = connect.cursor()
         try:
@@ -27,59 +29,59 @@ class UsersService:
             cursor.close()
             connect.close()
 
-    def create_user(self, user: User):
+    def create_car(self, car: Car):
         connect = get_connection()
         cursor = connect.cursor()
         try:
             cursor.execute(
-                "INSERT INTO users (email, phone_number, full_name) VALUES (%s, %s, %s)",
-                (user.email, user.phone_number, user.full_name)
+                "INSERT INTO users (model, color, year) VALUES (%s, %s, %s)",
+                (car.model, car.color, car.year)
             )
             connect.commit()
 
-            return user
+            return car
 
         except Exception as e:
             print(e)
-            raise HTTPException(status_code=400, detail="User already exists")
+            raise HTTPException(status_code=400, detail="Car already exists")
 
         finally:
             cursor.close()
             connect.close()
 
-    def delete_user(self, user_id: int):
+    def delete_car(self, car_id: int):
         connect = get_connection()
         cursor = connect.cursor()
         try:
-            cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+            cursor.execute("DELETE FROM cars WHERE id = %s", (car_id,))
             connect.commit()
-            return JSONResponse(status_code=204, content={"message": "User deleted successfully"})
+            return JSONResponse(status_code=204, content={"message": "Car deleted successfully"})
 
-        except Exception as e: 
-            print(str(e)) 
-            raise HTTPException(status_code=404, detail="User not found")
+        except Exception as e:
+            print(str(e))
+            raise HTTPException(status_code=404, detail="Car not found")
         finally:
             cursor.close()
             connect.close()
 
-    def update_user(self, user_id: int, user: User):
+    def update_car(self, car_id: int, car: Car):
         connect = get_connection()
         cursor = connect.cursor()
         try:
             cursor.execute(
-                "UPDATE users SET email=%s, phone_number=%s, full_name=%s WHERE id=%s",
-                (user.email, user.phone_number, user.full_name, user_id)
+                "UPDATE cars SET model=%s, color=%s, year=%s WHERE id=%s",
+                (car.email, car.phone_number, car.full_name, car_id)
             )
             connect.commit()
 
             if cursor.rowcount == 0:
-                raise HTTPException(status_code=404, detail="User not found")
+                raise HTTPException(status_code=404, detail="Car not found")
 
             return {
-                "id": user_id,
-                "email": user.email,
-                "phone_number": user.phone_number,
-                "full_name": user.full_name
+                "id": car_id,
+                "model": car.model,
+                "color": car.color,
+                "year": car.year
             }
 
         finally:

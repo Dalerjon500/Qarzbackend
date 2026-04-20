@@ -24,10 +24,10 @@ class CarService:
         try:
             cursor.execute(
                 """
-                SELECT c.car_id, c.model, c.color, c.year,  
+                SELECT c.car_id, c.model, c.color, c.year,
                 json_agg(
                     json_build_object(
-                    'id' , d.detail_id,
+                    'id' , d.details_id,
                     'name' , d.name
                     )) as details
                 FROM car c JOIN details d ON c.car_id = d.car_id
@@ -40,7 +40,7 @@ class CarService:
         finally:
             cursor.close()
             connect.close()
-   
+
     def create_car(self, car: Car):
         connect = get_connection()
         cursor = connect.cursor()
@@ -78,8 +78,8 @@ class CarService:
         try:
             cursor.execute(
                 """
-                UPDATE car 
-                SET model = %s, color = %s, year = %s 
+                UPDATE car
+                SET model = %s, color = %s, year = %s
                 WHERE car_id = %s
                 RETURNING car_id
                 """,
@@ -117,4 +117,3 @@ class CarService:
             cursor.close()
             connect.close()
 
-    
